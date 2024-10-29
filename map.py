@@ -30,6 +30,8 @@ from urllib.parse import quote_plus
 nltk.download('stopwords')
 nltk.download('punkt')
 stop_words = set(stopwords.words('english'))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODELS_DIR = os.path.join(BASE_DIR, 'models')
 
 # Initialize models
 model = SentenceTransformer('paraphrase-mpnet-base-v2')
@@ -359,8 +361,8 @@ def main():
 
                 if model_type in ['Linear SVC', 'Naive Bayes Multinomial']:
                     st.write(f"Model selected: {model_type}")
-                    model_file = "./models/" + model_type + '_trained_model.pkl'
-                    vectorizer_file = "./models/" + model_type + '_tfidf_vectorizer.pkl'
+                    model_file = os.path.join(MODELS_DIR, model_type + '_trained_model.pkl')
+                    vectorizer_file = os.path.join(MODELS_DIR, model_type + '_tfidf_vectorizer.pkl')
 
                     try:
                         model = joblib.load(model_file)
@@ -372,7 +374,8 @@ def main():
                         predictions2 = model.predict(X_retrieved_tfidf2)
                         predictions_df = pd.DataFrame(predictions, columns=['intent_encoded'])
                         predictions_df2 = pd.DataFrame(predictions2, columns=['intent_encoded'])
-                        label_encoder = joblib.load('./models/label_encoder.pkl')
+                        label_encoder_file = os.path.join(MODELS_DIR, 'label_encoder.pkl')
+                        label_encoder = joblib.load(label_encoder_file)
                         intent_encoded = predictions_df['intent_encoded']
                         intent_encoded2 = predictions_df2['intent_encoded']
                         predictions_df['intent'] = label_encoder.inverse_transform(intent_encoded)

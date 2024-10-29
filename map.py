@@ -171,23 +171,63 @@ def create_square_matrix(top_dict, df):
     return square_matrix_df
 
 def plot_graph(square_matrix, title):
-    df = pd.DataFrame(square_matrix)
+    import matplotlib.pyplot as plt
+    import networkx as nx
+    import numpy as np
+    import pandas as pd
+    import streamlit as st
+
+    # Convert the square matrix to a DataFrame if it's not already one
+    if not isinstance(square_matrix, pd.DataFrame):
+        df = pd.DataFrame(square_matrix)
+    else:
+        df = square_matrix.copy()
+    
+    # Get emotion names as node labels
     node_labels = df.index.tolist()
-    matrix = np.array(square_matrix)
+    
+    # Convert square matrix to a NumPy array
+    matrix = df.values
+    
+    # Create a graph from the NumPy array
     G = nx.from_numpy_array(matrix)
+    
+    # Remove self-loops from the graph
     G.remove_edges_from(nx.selfloop_edges(G))
+    
+    # Use Kamada-Kawai layout for positioning the nodes
     pos = nx.kamada_kawai_layout(G)
-    plt.figure(figsize=(10, 8))
+    
+    # Create a Matplotlib figure and axis
+    fig, ax = plt.subplots(figsize=(10, 8))
+    
+    # Draw the graph
     nx.draw(
-        G, pos, with_labels=True,
+        G,
+        pos,
+        ax=ax,
+        with_labels=True,
         labels={i: label for i, label in enumerate(node_labels)},
-        node_color='skyblue', node_size=1000, font_size=7, font_weight='bold',
-        edge_color='#D3D3D3', width=1, node_shape='o', edgecolors='none'
+        node_color='skyblue',
+        node_size=1000,
+        font_size=9,
+        font_weight='bold',
+        edge_color='#D3D3D3',
+        width=1,
+        node_shape='o',
+        edgecolors='none'
     )
-    plt.title(title)
-    plt.axis('off')
-    st.pyplot(plt.gcf())
-    plt.close()
+    
+    # Set title and turn off the axis
+    ax.set_title(title)
+    ax.axis('off')
+    
+    # Display the plot in Streamlit
+    st.pyplot(fig)
+    
+    # Close the figure to free up memory
+    plt.close(fig)
+
 
 def preprocess(text):
     text = re.sub(r'[^a-zA-Z\s]', '', text)
@@ -267,7 +307,6 @@ def remove_word(df, word):
 
 def main():
     st.title("Twitter Tweet Analyzer")
-    st.set_option('deprecation.showPyplotGlobalUse', False)
     bearer_token = st.text_input("Enter your Twitter Bearer Token:", type="password")
     search_str = st.text_input("Enter first keyword to search for tweets:")
     search_str2 = st.text_input("Enter second keyword to search for tweets:")
@@ -320,8 +359,8 @@ def main():
 
                 if model_type in ['Linear SVC', 'Naive Bayes Multinomial']:
                     st.write(f"Model selected: {model_type}")
-                    model_file = "./models/" + model_type + '_trained_model.pkl'
-                    vectorizer_file = "./models/" + model_type + '_tfidf_vectorizer.pkl'
+                    model_file = "models/" + model_type + '_trained_model.pkl'
+                    vectorizer_file = "models/" + model_type + '_tfidf_vectorizer.pkl'
 
                     try:
                         model = joblib.load(model_file)
@@ -333,7 +372,7 @@ def main():
                         predictions2 = model.predict(X_retrieved_tfidf2)
                         predictions_df = pd.DataFrame(predictions, columns=['intent_encoded'])
                         predictions_df2 = pd.DataFrame(predictions2, columns=['intent_encoded'])
-                        label_encoder = joblib.load('./models/label_encoder.pkl')
+                        label_encoder = joblib.load('models/label_encoder.pkl')
                         intent_encoded = predictions_df['intent_encoded']
                         intent_encoded2 = predictions_df2['intent_encoded']
                         predictions_df['intent'] = label_encoder.inverse_transform(intent_encoded)

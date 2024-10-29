@@ -361,8 +361,8 @@ def main():
 
                 if model_type in ['Linear SVC', 'Naive Bayes Multinomial']:
                     st.write(f"Model selected: {model_type}")
-                    model_file = os.path.join(MODELS_DIR, model_type + '_trained_model.pkl')
-                    vectorizer_file = os.path.join(MODELS_DIR, model_type + '_tfidf_vectorizer.pkl')
+                    model_file = os.path.join(MODELS_DIR, model_type + 'trained_model.pkl')
+                    vectorizer_file = os.path.join(MODELS_DIR, model_type + 'tfidf_vectorizer.pkl')
 
                     try:
                         model = joblib.load(model_file)
